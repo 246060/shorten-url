@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>Index</title>
+</head>
+<body>
+
+<h1>index</h1>
+
+<div>
+    <p><a href="/test" class="btn btn-success active" role="button">Test Page</a></p>
+</div>
+
+<div>
+    <div sec:authorize="isAnonymous()">
+        <p><a href="/vw/login" class="btn btn-success active" role="button">Login</a></p>
+    </div>
+
+    <div sec:authorize="isAuthenticated()">
+        <p> Only Authenticated user can see this Text </p>
+        <form th:action="@{/logout}" th:method="post">
+            <input type="submit" value="Logout">
+        </form>
+        </p>
+    </div>
+</div>
+
+</body>
+</html>
