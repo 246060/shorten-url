@@ -1,0 +1,27 @@
+app:
+  domain: http://localhost:8080
+
+spring:
+  datasource:
+    url: jdbc:h2:mem:testDB;DB_CLOSE_DELAY=-1;MODE=MYSQL
+    username: root
+    password: root
+    driver-class-name: org.h2.Driver
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    defer-datasource-initialization: true
+    hibernate:
+      ddl-auto: create
+      show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+  sql:
+    init:
+      mode: always
+
+logging:
+  level:
+    org.apache.coyote.http11: debug
+    org.hibernate.SQL: debug
+    org.hibernate.type.descriptor.sql: trace

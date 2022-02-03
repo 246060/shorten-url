@@ -1,0 +1,14 @@
+app:
+  domain: http://jocn.xyz
+
+spring:
+  datasource:
+    url: ${db_url} # jdbc:mariadb://{DB IP}/shorten-url?serverTimezone=UTC
+    username: ${db_username}
+    password: ${db_password}
+    driver-class-name: org.mariadb.jdbc.Driver
+  jpa:
+    database-platform: org.hibernate.dialect.MariaDB103Dialect
+    defer-datasource-initialization: false
+    hibernate:
+      ddl-auto: none
