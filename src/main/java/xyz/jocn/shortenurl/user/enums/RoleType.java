@@ -1,7 +1,7 @@
-package xyz.jocn.shortenurl.enums;
+package xyz.jocn.shortenurl.user.enums;
 
 public enum RoleType {
-	USER("ROLE_USER"), ADMIN("ROLE_ADMIN");
+	USER("ROLE_USER"), ADMIN("ROLE_ADMIN"), SYSTEM("ROLE_SYSTEM");
 
 	private String fullName;
 

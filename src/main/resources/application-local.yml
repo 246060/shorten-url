@@ -4,11 +4,11 @@ app:
 spring:
   datasource:
     url: jdbc:h2:mem:testDB;DB_CLOSE_DELAY=-1;MODE=MYSQL
-    username: root
-    password: root
+    username: sa
+    password:
     driver-class-name: org.h2.Driver
   jpa:
-    database-platform: org.hibernate.dialect.H2Dialect
+    database-platform: org.hibernate.dialect.H2Dialect # MariaDB103Dialect
     defer-datasource-initialization: true
     hibernate:
       ddl-auto: create

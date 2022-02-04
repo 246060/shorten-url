@@ -1,14 +1,17 @@
-package xyz.jocn.shortenurl.config;
+package xyz.jocn.shortenurl.common.config;
 
-import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import xyz.jocn.shortenurl.common.service.DefaultOAuth2UserServiceAdapter;
+import xyz.jocn.shortenurl.user.repo.UserRepository;
 
 @Slf4j
 @Configuration
@@ -19,9 +22,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Override
 	public void configure(WebSecurity web) throws Exception {
-		web.ignoring().requestMatchers(PathRequest.toStaticResources().atCommonLocations());
+		// web.ignoring().requestMatchers(PathRequest.toStaticResources().atCommonLocations());
 		// web.ignoring().mvcMatchers("/image/**");
-		web.ignoring().antMatchers("/h2-console/**");
+		// web.ignoring().antMatchers("/h2-console/**");
 	}
 
 	@Override
@@ -29,8 +32,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 		http.authorizeRequests()
 			.antMatchers("/vw/login").permitAll()
-			.antMatchers("/h2-console/**").permitAll()
-			.anyRequest().authenticated()
+			.antMatchers("/", "/vw/**").authenticated()
+			.anyRequest().permitAll()
 
 			.and()
 			.logout()

@@ -1,4 +1,4 @@
-package xyz.jocn.shortenurl.service;
+package xyz.jocn.shortenurl.common.service;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -14,32 +14,36 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Component;
 
 import lombok.extern.slf4j.Slf4j;
-import xyz.jocn.shortenurl.entity.UserEntity;
-import xyz.jocn.shortenurl.enums.ProviderType;
-import xyz.jocn.shortenurl.enums.RoleType;
-import xyz.jocn.shortenurl.repo.UserRepository;
+import xyz.jocn.shortenurl.user.UserEntity;
+import xyz.jocn.shortenurl.user.enums.ProviderType;
+import xyz.jocn.shortenurl.user.enums.RoleType;
+import xyz.jocn.shortenurl.user.repo.UserRepository;
 
 @Slf4j
-@Component
 public class DefaultOAuth2UserServiceAdapter implements OAuth2UserService<OAuth2UserRequest, OAuth2User> {
 
 	private UserRepository userRepository;
 	private OAuth2UserService<OAuth2UserRequest, OAuth2User> oAuth2UserService;
 
-	public DefaultOAuth2UserServiceAdapter(UserRepository userRepository) {
+	public DefaultOAuth2UserServiceAdapter(
+		UserRepository userRepository,
+		OAuth2UserService<OAuth2UserRequest, OAuth2User> oAuth2UserService
+	) {
 		log.info("DefaultOAuth2UserServiceAdapter instant create");
 		this.userRepository = userRepository;
-		oAuth2UserService = new DefaultOAuth2UserService();
+		this.oAuth2UserService = oAuth2UserService;
 	}
 
 	@Override
 	public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
+
 		OAuth2User oAuth2User = oAuth2UserService.loadUser(userRequest);
-		log.info("{}", userRequest.getClientRegistration().getRegistrationId());
-		log.info("{}", oAuth2User);
+		log.debug("{}", userRequest.getClientRegistration().getRegistrationId());
+		log.debug("{}", oAuth2User);
 
 		String providerUid = null;
 		Map<String, Object> userAttributes = new HashMap<>();
+
 		switch (getProviderType(userRequest)) {
 			case GOOGLE:
 				userAttributes.put("name", oAuth2User.getAttribute("name"));
@@ -71,7 +75,7 @@ public class DefaultOAuth2UserServiceAdapter implements OAuth2UserService<OAuth2
 		UserEntity user = userRepository
 			.findByEmail(email)
 			.map(userEntity -> {
-				userEntity.oauthLogin(name, email, picture, getProviderType(userRequest), finalProviderUid);
+				userEntity.oauthLogin(name, picture, getProviderType(userRequest), finalProviderUid);
 				return userEntity;
 			})
 			.orElse(

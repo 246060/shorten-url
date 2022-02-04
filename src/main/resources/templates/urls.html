@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>URL</title>
+    <link rel="stylesheet" href="/webjars/bootstrap/5.1.3/css/bootstrap.min.css">
+    <script type="text/javascript" src="/webjars/bootstrap/5.1.3/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/webjars/jquery/3.6.0/jquery.min.js"></script>
+    <style>
+        #user-email {
+            cursor: default;
+        }
+
+        #form-logout {
+            text-align: right;
+        }
+
+        .btn-item-del {
+            font-weight: bold
+        }
+    </style>
+    <script>
+        $(function () {
+            $(".btn-item-del").click(function () {
+                var id = $(this).closest('tr').children('.item-id').val();
+                $('#delete-target').val(id);
+                $('#form-url-delete').submit();
+            })
+        })
+    </script>
+</head>
+<body>
+
+<form th:action="@{/vw/urls/delete}" method="post" id="form-url-delete">
+    <input type="hidden" name="urlId" id="delete-target" value="">
+    <input type="submit" id="btn-item-delete-submit" style="display: none">
+</form>
+
+
+<div class="container mt-5">
+
+    <div class="row">
+        <div sec:authorize="isAnonymous()">
+            <p><a href="/vw/login" class="btn btn-success active" role="button">Login</a></p>
+        </div>
+        <div sec:authorize="isAuthenticated()" class="row">
+            <form th:action="@{/logout}" th:method="post" id="form-logout">
+                <span id="user-email" class="btn btn-primary btn-sm" sec:authentication="name">-</span>
+                <input type="submit" class="btn btn-outline-primary btn-sm" value="Logout">
+            </form>
+            </p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="row">
+            <form th:action="@{/vw/urls}" id="form-url" method="post" th:object="${createUrlDto}">
+                <div class="form-group">
+                    <label for="url" class="mb-2" style="font-weight: bold;">Long URL: </label>
+                    <input type="text" class="form-control" id="url" th:field="*{originUrl}" th:errorclass="is-invalid">
+                    <div class="invalid-feedback" th:errors="*{originUrl}">에러메시지</div>
+                </div>
+                <div class="mt-2">
+                    <input type="submit" class="btn btn-primary" value="생성"/>
+                </div>
+            </form>
+        </div>
+
+        <div class="row mt-5">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Short URL</th>
+                    <th scope="col">Long URL</th>
+                    <th scope="col">Click</th>
+                    <th scope="col">delete</th>
+                </tr>
+                </thead>
+
+                <tbody id="table-body">
+
+                <tr th:each="item, state : ${page.content}"
+                    th:with="seq = ${(page.paging.page * page.paging.size) + 1}">
+                    <input type="hidden" class="item-id" th:value="${item.id}">
+                    <th scope="row" th:text="${seq + state.index}">-</th>
+                    <td class="list-long-url-item" th:text="${item.shortenUrl}">-</td>
+                    <td class="list-long-url-item" th:text="${item.originUrl}">-</td>
+                    <td th:text="${item.clickCnt}">0</td>
+                    <td>
+                        <button type="submit" class="btn btn-danger btn-sm btn-item-del"> 삭제</button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+    <div class="row">
+        <nav aria-label="Page navigation example">
+
+            <ul class="pagination justify-content-center"
+                th:with="
+                    start = ${T(Math).floor(page.paging.page / page.paging.size) * page.paging.size + 1},
+                    temp = ${start + page.paging.size - 1},
+                    end = (${temp > page.paging.totalPages ? page.paging.totalPages : temp})">
+
+                <th:block th:if="${end!=0}">
+
+                    <th:block th:if="${page.paging.page >= 10}">
+                        <li class="page-item">
+                            <a aria-label="Previous"
+                               class="page-link" tabindex="-1"
+                               th:href="@{/vw/urls(page=${#numbers.formatInteger(start-2,0)})}">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                    </th:block>
+
+                    <li class="page-item"
+                        th:each="idx: ${#numbers.sequence(start, end)}"
+                        th:classappend="${idx == page.paging.page + 1} ? 'active'">
+                        <a class="page-link" th:href="@{/vw/urls(page=${idx-1})}" th:text="${idx}"> </a>
+                    </li>
+
+                    <th:block th:if="${end < page.paging.totalPages}">
+                        <li class="page-item">
+                            <a class="page-link" th:href="@{/vw/urls(page=${#numbers.formatInteger(end,0)})}"
+                               aria-label="Next">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                    </th:block>
+
+                </th:block>
+
+
+            </ul>
+        </nav>
+    </div>
+
+</div>
+
+</body>
+</html>
