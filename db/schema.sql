@@ -1,5 +1,5 @@
-DROP TABLE IF EXISTS `user` CASCADE;
 DROP TABLE IF EXISTS `url` CASCADE;
+DROP TABLE IF EXISTS `user` CASCADE;
 
 CREATE TABLE `user` (
     `uid` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -11,6 +11,8 @@ CREATE TABLE `user` (
     `role` varchar(20) NOT NULL,
     `created_at` datetime(6),
     `updated_at` datetime(6),
+    `created_by` bigint(20) DEFAULT NULL,
+    `updated_by` bigint(20) DEFAULT NULL,
     PRIMARY KEY (`uid`),
     UNIQUE KEY `uk_user_email` (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

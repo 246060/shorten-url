@@ -5,7 +5,6 @@ import javax.annotation.PostConstruct;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
-import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
 
@@ -16,7 +15,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import xyz.jocn.shortenurl.common.service.DefaultOAuth2UserServiceAdapter;
-import xyz.jocn.shortenurl.user.repo.UserRepository;
+import xyz.jocn.shortenurl.user.UserService;
 
 @Slf4j
 @Configuration
@@ -42,7 +41,7 @@ public class ApplicationBeanConfig {
 	}
 
 	@Bean
-	public OAuth2UserService oAuth2UserService(UserRepository userRepository) {
-		return new DefaultOAuth2UserServiceAdapter(userRepository, new DefaultOAuth2UserService());
+	public OAuth2UserService oAuth2UserService(UserService userService) {
+		return new DefaultOAuth2UserServiceAdapter(userService, new DefaultOAuth2UserService());
 	}
 }

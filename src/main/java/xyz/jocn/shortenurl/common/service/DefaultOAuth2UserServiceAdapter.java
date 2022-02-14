@@ -3,34 +3,35 @@ package xyz.jocn.shortenurl.common.service;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
-import org.springframework.stereotype.Component;
 
 import lombok.extern.slf4j.Slf4j;
-import xyz.jocn.shortenurl.user.UserEntity;
+import xyz.jocn.shortenurl.user.UserService;
+import xyz.jocn.shortenurl.user.dto.UserDto;
 import xyz.jocn.shortenurl.user.enums.ProviderType;
-import xyz.jocn.shortenurl.user.enums.RoleType;
-import xyz.jocn.shortenurl.user.repo.UserRepository;
 
 @Slf4j
 public class DefaultOAuth2UserServiceAdapter implements OAuth2UserService<OAuth2UserRequest, OAuth2User> {
 
-	private UserRepository userRepository;
+	private final String nameAttributeKey = "email";
+	private final String addedUserAttrKey = "uid";
+
+	private UserService userService;
 	private OAuth2UserService<OAuth2UserRequest, OAuth2User> oAuth2UserService;
 
 	public DefaultOAuth2UserServiceAdapter(
-		UserRepository userRepository,
+		UserService userService,
 		OAuth2UserService<OAuth2UserRequest, OAuth2User> oAuth2UserService
 	) {
 		log.info("DefaultOAuth2UserServiceAdapter instant create");
-		this.userRepository = userRepository;
+		this.userService = userService;
 		this.oAuth2UserService = oAuth2UserService;
 	}
 
@@ -64,39 +65,18 @@ public class DefaultOAuth2UserServiceAdapter implements OAuth2UserService<OAuth2
 				providerUid = (String)((Map)oAuth2User.getAttribute("response")).get("id");
 				break;
 			case KAKAO:
+				// TODO
 				break;
 		}
 
-		String name = (String)userAttributes.get("name");
-		String email = (String)userAttributes.get("email");
-		String picture = (String)userAttributes.get("picture");
-		String finalProviderUid = providerUid;
+		long uid = userService.saveOrUpdate(userAttributes, getProviderType(userRequest), providerUid);
+		UserDto user = userService.getUser(uid);
+		userAttributes.put(addedUserAttrKey, user.getUid());
 
-		UserEntity user = userRepository
-			.findByEmail(email)
-			.map(userEntity -> {
-				userEntity.oauthLogin(name, picture, getProviderType(userRequest), finalProviderUid);
-				return userEntity;
-			})
-			.orElse(
-				UserEntity.builder()
-					.name(name)
-					.email(email)
-					.picture(picture)
-					.providerType(getProviderType(userRequest))
-					.providerUid(finalProviderUid)
-					.role(RoleType.USER)
-					.build()
-			);
+		Set<SimpleGrantedAuthority> authorities
+			= Collections.singleton(new SimpleGrantedAuthority(user.getRole().getFullName()));
 
-		userRepository.save(user);
-		userAttributes.put("uid", user.getUid());
-
-		return new DefaultOAuth2User(
-			Collections.singleton(new SimpleGrantedAuthority(user.getRole().getFullName())),
-			userAttributes,
-			"email"
-		);
+		return new DefaultOAuth2User(authorities, userAttributes, nameAttributeKey);
 	}
 
 	private ProviderType getProviderType(OAuth2UserRequest userRequest) {
